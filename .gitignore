@@ -3,3 +3,6 @@ receptyscrap/html/recepty.html
 receptyscrap/html/individualrecipe.html
 
 *.html
+/receptyscrap/debug.log
+receptyscrap/html/individualrecipe.html
+receptyscrap/html/individualrecipe.html

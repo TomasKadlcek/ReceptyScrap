@@ -20,6 +20,7 @@ def get_all_urls():
     cursor.execute(query)
 
     send_url_to_driver(cursor, cnx)
+    cnx.close()
 
 
 def send_url_to_driver(cursor, cnx):
@@ -31,6 +32,7 @@ def send_url_to_driver(cursor, cnx):
 
         write_to_file(driver, cnx, refined_url)
 
+    cursor.close()
     driver.quit()
 
 
@@ -52,10 +54,10 @@ def scrap_file(cnx, refined_url):
     scrapped_file = codecs.open("html/individualrecipe.html", "r", "utf-8")
     soup = BeautifulSoup(scrapped_file, "lxml")
 
-    scrape_and_send(cnx, soup, refined_url)
+    scrape_data(cnx, soup, refined_url)
 
 
-def scrape_and_send(cnx, soup, refined_url):
+def scrape_data(cnx, soup, refined_url):
     img_regex = re.compile("v-carousel--item.*")
     description_regex = re.compile("paragraph.*")
 
@@ -87,21 +89,33 @@ def scrape_and_send(cnx, soup, refined_url):
     print(ingredience_str)
     print(description_str)
 
+    send_to_db(cnx, refined_name, refined_rating, ingredience_str, description_str, img, refined_url)
 
-    # for wrapper in soup.find_all("div", class_="search-results__wrapper"):
-    #     for recipe in wrapper.find_all("div", class_="recommended-recipes__article-meta"):
-    #         a = recipe.find("a", href=True)
-    #         cursor = cnx.cursor()
-    #
-    #         add_url = ("INSERT INTO urls " "(url) " "VALUES (\"" + a["href"] + "\")")
-    #
-    #         cursor.execute(add_url)
-    #
-    #         cnx.commit()
-    #         cursor.close()
-    #
-    # cnx.close()
 
+def send_to_db(cnx, refined_name, refined_rating, ingredience_str, description_str, img, refined_url):
+    cnx2 = mysql.connector.connect(user='root', password='password',
+                                   host='localhost',
+                                   database='py_scrap')
+    cursor = cnx2.cursor(buffered=True)
+
+    add_recipe = ("INSERT INTO recipes "
+                  "(recipe_name, rating, pict_url, ingredients, recipe_desc, url) "
+                  "VALUES (%(recipe_name)s, %(rating)s, %(pict_url)s, %(ingredients)s, %(recipe_desc)s, %(url)s)")
+
+    data_recipe = {
+        'recipe_name': refined_name,
+        'rating': refined_rating,
+        'pict_url': img,
+        'ingredients': ingredience_str,
+        'recipe_desc': description_str,
+        'url': refined_url,
+    }
+
+    cursor.execute(add_recipe, data_recipe)
+
+    cnx2.commit()
+    cursor.close()
+    cnx2.close()
 
 
 get_all_urls()
