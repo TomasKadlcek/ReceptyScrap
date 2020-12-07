@@ -78,13 +78,14 @@ def scrape_and_send(cnx, soup, refined_url):
     for description in soup.find_all("div", id=description_regex):
         description_text = description.text
         refined_description = " ".join(description_text.split())
-        description_str
+        description_str = description_str + refined_description + " "
 
     print(refined_url)
     print(refined_rating)
     print(refined_name)
     print(img)
     print(ingredience_str)
+    print(description_str)
 
 
     # for wrapper in soup.find_all("div", class_="search-results__wrapper"):
