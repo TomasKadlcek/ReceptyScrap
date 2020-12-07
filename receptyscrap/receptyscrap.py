@@ -55,7 +55,6 @@ def connect_mysql():
 # finishes the process by scrapping all needed URLs and sending them to MySQL. Process goes over again in open_driver
 # until condition of 20 pages met.
 def scrape_and_send(cnx, soup):
-    x = 0
     for wrapper in soup.find_all("div", class_="search-results__wrapper"):
         for recipe in wrapper.find_all("div", class_="recommended-recipes__article-meta"):
             a = recipe.find("a", href=True)
